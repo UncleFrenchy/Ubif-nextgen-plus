@@ -13,7 +13,8 @@
         "https://portal.ubreakifix.net/*"
       ],
       "js": [
-        "page.js"
+        "page.js",
+        "messages-page.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
@@ -32,6 +33,9 @@
         "search.js",
         "board-model.js",
         "board.js",
+        "message-model.js",
+        "message-ui.js",
+        "messages.js",
         "support.js"
       ],
       "run_at": "document_idle"

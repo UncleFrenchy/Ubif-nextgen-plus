@@ -4,11 +4,25 @@ User-visible changes are recorded here. **Unreleased** describes work in the cur
 
 ## [Unreleased]
 
+### Added
+
+- Customer message templates inside the Messages sidebar: create, edit and delete locally saved templates, insert customer/device/work order/appointment fields with optional fallback text, and personalize a real-data preview before inserting into the Portal composer.
+
 ### Improved
+
+- Message templates now use compact shortcuts and a searchable library. A visual editor inserts readable detail chips at the typing cursor, provides customer previews and simple alternate-text settings, and supports copying templates and undoing deletion. Missing required details prompt for one-time values, and existing drafts offer explicit Add or Replace actions.
 
 - New icon artwork: a dark rounded tile with a white **U** and a sky-blue plus, sourced from `icon.svg` and rendered into every toolbar, notification, and store-facing asset. The previous raster art is kept as `old-icon.jpeg`.
 
 ### Fixed
+
+- Message templates recover appointment/device details from the matching mounted arrival when chat is already open or its launch click was missed. Late arrival data completes the original template selection and removes the unnecessary missing-appointment prompt.
+
+- Saved templates automatically resolve the selected workorder's linked arrival appointment and missing customer contact details. Clicking while details load completes insertion after loading instead of asking for information that is already on the record. Arrivals also reads the original arrival when its summary omits appointment time.
+
+- Template detail insertion preserves the message cursor after clicking another field or detail button, including browsers that expose selections at the shadow host.
+
+- Message templates now attach to the actual shared customer ChatPanel used by Arrivals and Workorders, including panels titled with the customer's name. Arrivals templates read the selected customer card's device and appointment information; Workorders templates follow the chat's selected order.
 
 - Scanning a product SKU or part number into the portal's own search bar, or into the "add part" input on a work order diagnostic stage, no longer blanks the field. The scanner now detects portal-owned inputs — any input inside an open dialog and inputs on work order detail pages — and lets the portal handle the scan natively instead of redirecting it to universal search.
 
