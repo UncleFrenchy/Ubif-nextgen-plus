@@ -12,6 +12,8 @@ User-visible changes are recorded here. **Unreleased** describes work in the cur
 
 - Message templates now use compact shortcuts and a searchable library. A visual editor inserts readable detail chips at the typing cursor, provides customer previews and simple alternate-text settings, and supports copying templates and undoing deletion. Missing required details prompt for one-time values, and existing drafts offer explicit Add or Replace actions.
 
+- Arrivals now offers the same 10/25/50/100 rows-per-page choices as Workorders, with native table pagination, a saved preference, and a toggle and page-size dropdown in addon settings → Tables.
+
 - New icon artwork: a dark rounded tile with a white **U** and a sky-blue plus, sourced from `icon.svg` and rendered into every toolbar, notification, and store-facing asset. The previous raster art is kept as `old-icon.jpeg`.
 
 ### Fixed

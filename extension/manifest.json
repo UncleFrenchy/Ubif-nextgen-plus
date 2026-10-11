@@ -14,7 +14,8 @@
       ],
       "js": [
         "page.js",
-        "messages-page.js"
+        "messages-page.js",
+        "arrivals-page.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
@@ -26,6 +27,7 @@
       "js": [
         "settings.js",
         "home.js",
+        "arrivals.js",
         "scanner.js",
         "model.js",
         "content.js",

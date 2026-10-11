@@ -34,8 +34,9 @@ section>p { font-size:13px; color:var(--soft); }
 .row small { display:block; margin-top:4px; color:var(--soft); font-size:12px; line-height:1.5; font-weight:400; }
 .row input[type=checkbox] { width:17px; height:17px; margin:0; flex:none; accent-color:var(--accent); cursor:pointer; }
 .row input[type=number] { width:76px; padding:5px 7px; border:1px solid var(--line); border-radius:4px; background:var(--paper); font-variant-numeric:tabular-nums; }
-.row:has(input:disabled) { color:var(--soft); cursor:default; }
-.row input:disabled { opacity:.45; cursor:default; }
+.row select { width:76px; padding:5px 7px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--text); font:inherit; }
+.row:has(input:disabled), .row:has(select:disabled) { color:var(--soft); cursor:default; }
+.row input:disabled, .row select:disabled { opacity:.45; cursor:default; }
 .reset { margin-top:22px; padding:3px 0; border:0; border-radius:2px; background:transparent; color:var(--soft); font-size:12px; text-decoration:underline; text-underline-offset:3px; }
 .reset:hover:not(:disabled) { background:transparent; color:var(--text); }
 .help-card { margin:20px 0; }
@@ -75,7 +76,7 @@ html.full-page { width:auto; min-width:0; }
   <a href="#search" data-section="search">Universal search</a>
   <a href="#board" data-section="board">Update Today</a>
   <a href="#scanner" data-section="scanner">Barcode scanning</a>
-  <a href="#columns" data-section="columns">Table columns</a>
+  <a href="#columns" data-section="columns">Tables</a>
   <a href="#support" data-section="support">Support chat</a>
   <a href="#updates" data-section="updates">Updates &amp; help</a></nav><main id="settings-content">
 <section id="home" aria-labelledby="home-title"><h2 id="home-title" tabindex="-1">Home</h2>
@@ -113,10 +114,12 @@ html.full-page { width:auto; min-width:0; }
   <label class="row"><span>Confirm valid OEM serials automatically<small>Confirm a scanned serial after portal validation. Turn off to review it first.</small></span><input type="checkbox" data-key="scannerOEMConfirm" data-depends="scanner scannerReceiving" disabled></label>
   <button class="reset" type="button" data-reset="scanner" disabled>Restore defaults</button>
 </section>
-<section id="columns" aria-labelledby="columns-title"><h2 id="columns-title" tabindex="-1">Table columns</h2>
+<section id="columns" aria-labelledby="columns-title"><h2 id="columns-title" tabindex="-1">Tables</h2>
   <label class="row"><span>Enable custom columns<small>Use the Columns button on each table to choose fields, order, and widths.</small></span><input type="checkbox" data-key="columns" data-depends="" disabled></label>
   <label class="row"><span>Workorders<small>Allow custom layouts on Workorders. Each tab keeps its own layout.</small></span><input type="checkbox" data-key="columnsWorkorders" data-depends="columns" disabled></label>
   <label class="row"><span>Arrivals<small>Allow a separate custom layout on the Arrivals table.</small></span><input type="checkbox" data-key="columnsArrivals" data-depends="columns" disabled></label>
+  <label class="row"><span>Arrivals page-size selector<small>Choose how many arrivals appear per page, up to 100. Turning this off restores the portal’s 10 rows per page.</small></span><input type="checkbox" data-key="arrivalsPagination" data-depends="" disabled></label>
+  <label class="row"><span>Arrivals rows per page<small>Also updates when you change the dropdown on Arrivals. Independent of custom columns.</small></span><select data-key="arrivalsPageSize" data-depends="arrivalsPagination" disabled><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
   <button class="reset" type="button" data-reset="columns" disabled>Restore defaults</button>
 </section>
 <section id="support" aria-labelledby="support-title"><h2 id="support-title" tabindex="-1">Support chat</h2>

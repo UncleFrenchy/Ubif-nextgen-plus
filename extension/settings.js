@@ -27,6 +27,8 @@
     scannerOEMConfirm: true,
     columnsWorkorders: true,
     columnsArrivals: true,
+    arrivalsPagination: true,
+    arrivalsPageSize: 10,
     supportDesktopNotifications: true,
     supportUnreadBadge: true,
     supportMessagePreview: true,
@@ -56,6 +58,7 @@
       }
     }
     for (const [key, bounds] of Object.entries(range)) next[key] = clamp(Math.round(next[key]), bounds);
+    if (![10, 25, 50, 100].includes(next.arrivalsPageSize)) next.arrivalsPageSize = defaults.arrivalsPageSize;
     return next;
   }
 
@@ -84,8 +87,16 @@
     if (!local) return { ...current };
     const before = revision;
     const data = await local.get(KEY);
+    let raw = data && data[KEY];
+    // Preserve the page-size choice from the original standalone control.
+    // Once the shared record has this key, including after a reset, it wins.
+    if (before === revision && (!raw || !Object.prototype.hasOwnProperty.call(raw, 'arrivalsPageSize'))) {
+      const legacy = await local.get('ubif-plus.arrivals.page-size.v1');
+      const value = legacy && legacy['ubif-plus.arrivals.page-size.v1'];
+      if ([10, 25, 50, 100].includes(value)) raw = { ...raw, arrivalsPageSize: value };
+    }
     // A slow initial read must never undo a newer storage event.
-    if (before === revision) publish(data && data[KEY]);
+    if (before === revision) publish(raw);
     return { ...current };
   }
 

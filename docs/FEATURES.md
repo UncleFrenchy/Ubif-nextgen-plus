@@ -12,7 +12,7 @@ Click the extension's toolbar icon for settings, then use the category navigatio
 - **Universal search**: enable search, configure the shortcut, delay (100–2,000 ms) and minimum query length (3–10), choose each of the five result categories, and open results in new tabs. Disabled categories make no search requests. Work orders still require at least 5 digits and claims at least 6 characters.
 - **Update Today**: enable the board, include tomorrow by default, toggle periodic refresh and set its interval (15–600 seconds), allow status drag and drop, and show or hide empty status columns. Opening or returning to the board still refreshes it with periodic refresh off.
 - **Barcode scanning**: enable scanning, independently control opening work orders/portal links and forwarding other scans to search, enable purchase-order receiving, and choose automatic OEM field focus and confirmation. Turning confirmation off leaves valid serials for manual review.
-- **Table columns**: enable custom columns separately for Workorders and Arrivals. Manage visible columns, order, widths, presets, and layout resets with **Columns** on the relevant portal table, where the current tab's data is available.
+- **Tables**: enable custom columns separately for Workorders and Arrivals, toggle Arrivals pagination, and choose 10/25/50/100 rows per page. Manage visible columns, order, widths, presets, and layout resets with **Columns** on the relevant portal table, where the current tab's data is available.
 - **Support chat**: enable the movable/minimizable support window, desktop notifications, unread badges, and notification message previews separately. Disable previews for a generic new-message notification.
 
 Existing preferences are preserved. New settings retain the previous behavior by default; opening search results in a new tab is off by default. Category resets only restore that category's preferences, leaving saved column layouts intact. **Feature request** and **Buy me a coffee** open in new tabs.
@@ -91,6 +91,12 @@ Columns are grouped in the dialog as **Workorder**, **Program**, **Customer**, a
 Arrivals has its own catalog aligned to the portal's own column list — **Program type**, **Appointment**, **Arrival status**, **Customer**, **Device** — with data columns **Arrival #**, **Client**, **Created**, **Updated**, **Missed arrival**, **Notes**, **Phone**, **Email**, **Contact prefs**, **Customer ID**, **City** and **Issues** available behind a click. Rows are matched to their records by customer name and email, so duplicated names still resolve to the right arrival.
 
 Its dialog is grouped **Arrival**, **Customer**, **Device** (plus **Table** for headers this catalog does not recognise), its presets are *Portal only*, *Contact*, *Ops board*, *Everything*, and its copy describes arrival data rather than tabs. Data columns are filled from the portal's own `GET /api/arrivals/upcoming-arrivals` responses, forwarded the same way workorder data is; the extension never invents a value.
+
+### Arrivals pagination
+
+Arrivals offers **10, 25, 50, or 100 rows per page**, matching Workorders. The compact selector shares the existing Add new/Columns toolbar (or the native pagination footer when no toolbar is available) and saves its choice in extension-local storage in the shared settings record (`arrivalsPageSize` in `ubif-plus.settings.v1`). Changing the size returns to page 1 while preserving the current search, filters, and appointment sort. The portal continues to fetch and render the table and operate its First/Previous/Next/Last controls. This feature works independently of custom columns. Open addon settings → **Tables** to enable or disable it and choose the page size. The portal dropdown and settings stay in sync across tabs. Turning pagination off restores 10 rows per page while retaining your selected size for when it is re-enabled. Earlier saved page-size preferences are preserved.
+
+The adapter uses the observed Arrivals React query and pagination state from the public R92.4 frontend. If that structure changes, the selector disables itself and reports that the layout is unsupported. Automated checks and a fictional-data reproduction using the portal’s actual pagination component cover page-size changes and navigation; authenticated Arrivals API behavior still needs a live check.
 
 ### Data columns
 

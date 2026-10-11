@@ -63,7 +63,7 @@ test('settings fall back to defaults, keep known keys only, and clamp the number
     boardRefreshSec: 60, boardIncludeTomorrow: false,
     searchCustomers: true, searchWorkOrders: true, searchItems: true, searchClaims: true, searchSerials: true, searchNewTab: false,
     scannerOpenLinks: true, scannerSearch: true, scannerReceiving: true, scannerOEMFocus: true, scannerOEMConfirm: true,
-    columnsWorkorders: true, columnsArrivals: true, supportDesktopNotifications: true, supportUnreadBadge: true,
+    columnsWorkorders: true, columnsArrivals: true, arrivalsPagination: true, arrivalsPageSize: 10, supportDesktopNotifications: true, supportUnreadBadge: true,
     supportMessagePreview: true, boardAutoRefresh: true, boardDragDrop: true, boardShowEmpty: true
   });
   const next = await S.set({ searchDebounceMs: 5, searchMinChars: 99, boardRefreshSec: 1e6, columns: false, theme: 'dark' });
@@ -523,4 +523,52 @@ test('resuming a tab reconciles persisted preferences even when an event was mis
   s.data[KEY] = { hideHomeCalendar: true };
   w.dispatchEvent(new w.Event('focus')); await tick(w);
   assert.equal(seen.at(-1).hideHomeCalendar, true);
+});
+
+test('Arrivals size migrates from the old preference and reset takes precedence', async t => {
+  const dom = page('<p>'); t.after(() => dom.window.close());
+  const s = storage(dom.window, { 'ubif-plus.arrivals.page-size.v1': 100 });
+  dom.window.eval(settingsScript);
+  const S = dom.window.UBIFPlusSettings;
+  assert.equal((await S.get()).arrivalsPageSize, 100);
+  await S.set({ arrivalsPageSize: 10 });
+  assert.equal((await S.get()).arrivalsPageSize, 10);
+  assert.equal(s.data[KEY].arrivalsPageSize, 10);
+  assert.equal(S.sanitize({ arrivalsPageSize: 77 }).arrivalsPageSize, 10);
+});
+
+test('Tables settings save Arrivals page size and disable only its dependent dropdown', async t => {
+  const dom = new JSDOM(popupHtml, { url: 'chrome-extension://abcdef/popup.html#columns', runScripts: 'outside-only' });
+  t.after(() => dom.window.close());
+  const w = dom.window, s = storage(w, { [KEY]: { columns: false, search: false } });
+  w.eval(settingsScript); w.eval(popupScript); await tick(w);
+  const select = w.document.querySelector('[data-key=arrivalsPageSize]');
+  assert.equal(select.disabled, false, 'pagination is independent of custom columns');
+  select.value = '100'; select.dispatchEvent(new w.Event('change')); await tick(w);
+  assert.equal(s.data[KEY].arrivalsPageSize, 100);
+  const toggle = w.document.querySelector('[data-key=arrivalsPagination]');
+  toggle.checked = false; toggle.dispatchEvent(new w.Event('change')); await tick(w);
+  assert.equal(select.disabled, true);
+  assert.equal(s.data[KEY].arrivalsPageSize, 100, 'disabled preference is retained');
+  w.document.querySelector('[data-reset=columns]').click(); await tick(w);
+  assert.equal(select.value, '10'); assert.equal(select.disabled, false);
+  assert.equal(s.data[KEY].search, false, 'table reset preserves unrelated settings');
+});
+
+test('open Arrivals tabs react to settings, restore ten on disable, and save portal edits', async t => {
+  const dom = page('<main><div><button>Add new</button></div><section data-testid="arrivals-container"><table></table></section></main>', 'https://portal.ubreakifix.net/check-in/arrivals');
+  t.after(() => dom.window.close());
+  const w = dom.window, s = storage(w, { [KEY]: { arrivalsPageSize: 50 } }), requests = [];
+  w.postMessage = message => requests.push(message);
+  w.eval(settingsScript); w.eval(read('arrivals.js')); await tick(w);
+  const select = () => w.document.querySelector('#ubif-plus-arrivals-pagination select');
+  assert.equal(select().value, '50');
+  s.changed({ ...s.data[KEY], arrivalsPageSize: 100 });
+  assert.equal(select().value, '100');
+  s.changed({ ...s.data[KEY], arrivalsPageSize: 100, arrivalsPagination: false });
+  assert.equal(select(), null); assert.equal(requests.at(-1).pageSize, 10);
+  s.changed({ ...s.data[KEY], arrivalsPageSize: 100, arrivalsPagination: true });
+  assert.equal(select().value, '100');
+  select().value = '25'; select().dispatchEvent(new w.Event('change')); await tick(w);
+  assert.equal(s.data[KEY].arrivalsPageSize, 25);
 });
