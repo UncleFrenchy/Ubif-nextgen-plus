@@ -10,7 +10,7 @@
   const owns = () => document.documentElement.dataset.ubifPlusSearchOwner === owner;
   const { categories, plan, rows } = globalThis.UBIFPlusSearch;
   const S = globalThis.UBIFPlusSettings;
-  const fallback = { search: true, searchDebounceMs: 350, searchMinChars: 3, searchHotkey: true };
+  const fallback = { search: true, searchDebounceMs: 350, searchMinChars: 3, searchHotkey: true, searchBuyback: true };
   let config = { ...fallback };
   const categoryKeys = { Customers: 'searchCustomers', 'Work orders': 'searchWorkOrders', Items: 'searchItems', Claims: 'searchClaims', 'Serial numbers': 'searchSerials' };
   const enabledCategories = () => categories.filter(name => config[categoryKeys[name]] !== false);
@@ -48,6 +48,11 @@
     #ubif-search-results a { display:block; padding:10px; border-radius:8px; color:inherit; text-decoration:none; overflow-wrap:anywhere; }
     #ubif-search-results a:hover, #ubif-search-results a:focus { background:var(--aui-primary-container,#eee2f9); outline:2px solid var(--aui-primary,#8224ce); }
     #ubif-search-results .ubif-result-label { display:block; font-size:12px; font-weight:600; color:var(--aui-on-surface-soft,#5d5e61); margin-bottom:4px; }
+    #ubif-search-results .ubif-result-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    #ubif-search-results .ubif-result-row > a { flex:1 1 200px; min-width:0; }
+    #ubif-search-results .ubif-buyback-action { flex:0 0 auto; padding:7px 10px; border:1px solid var(--aui-outline,#bbb); border-radius:8px; background:var(--aui-elevated-level-01,#fff); font-size:12px; }
+    #ubif-search-results .ubif-buyback-action:focus-visible { outline:2px solid var(--aui-primary,#8224ce); }
+    #ubif-search-results .ubif-result-row > #ubif-buyback { flex-basis:100%; margin:0 10px 8px; }
     #ubif-search-results small { display:block; margin-top:4px; }
   `;
   document.head.append(style);
@@ -77,8 +82,9 @@
     if (input.placeholder !== next) input.placeholder = next;
   };
   if (typeof ResizeObserver === 'function') new ResizeObserver(entries => fitPlaceholder(entries[0].contentRect.width)).observe(root);
-  function open(value) { panel.hidden = !value; input.setAttribute('aria-expanded', String(value)); }
-  function stop() { clearTimeout(timer); controller?.abort(); generation++; }
+  function open(value) { panel.hidden = !value; input.setAttribute('aria-expanded', String(value)); if (!value) globalThis.UBIFPlusBuyback?.cancel(); }
+  const rowNodes = new Map();
+  function stop() { clearTimeout(timer); controller?.abort(); generation++; rowNodes.clear(); globalThis.UBIFPlusBuyback?.cancel(); }
   /* A search that finishes between a press and its release rebuilds the panel
      and swaps the row out from under the pointer, so the click lands on a
      detached element and nothing happens. The panel therefore holds still while
@@ -111,11 +117,22 @@
       section.append(el('h3', `${group.name}${group.rows.length ? ` (${group.rows.length})` : ''}`));
       if (!group.active) section.append(el('p', group.name === 'Work orders' ? 'Enter a work order number (at least 5 digits).' : group.name === 'Claims' ? 'Claims need at least 6 characters.' : 'Enter an inventory serial, e.g. I-1234567890.'));
       for (const row of group.rows) {
+        let wrapper = rowNodes.get(`${group.name}:${row.key}`);
+        if (wrapper) { section.append(wrapper); continue; }
+        wrapper = el('div', '', { class: 'ubif-result-row' });
+        rowNodes.set(`${group.name}:${row.key}`, wrapper);
         const link = el('a', row.title, { href: row.href });
         if (config.searchNewTab) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
         if (row.label) link.prepend(el('span', row.label, { class: 'ubif-result-label' }));
         if (row.detail) link.append(el('small', row.detail));
-        section.append(link);
+        link.addEventListener('click', () => globalThis.UBIFPlusBuyback?.cancel());
+        wrapper.append(link);
+        if (config.searchBuyback && row.buyback) {
+          const print = el('button', 'Print buyback', { type: 'button', class: 'ubif-buyback-action', 'aria-label': `Print buyback label for ${row.title}`, title: 'Print from a sold serial’s linked work order' });
+          print.onclick = event => { event.preventDefault(); event.stopPropagation(); globalThis.UBIFPlusBuyback?.start(row.buyback, wrapper); };
+          wrapper.append(print);
+        }
+        section.append(wrapper);
       }
       if (group.pending) section.append(el('p', 'Searching…'));
       else if (group.active && !group.rows.length && !group.error) section.append(el('p', 'No matches'));

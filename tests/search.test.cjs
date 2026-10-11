@@ -183,3 +183,48 @@ test('a unique customer includes their arrivals with plain appointment/arrival l
   assert.equal(panel.querySelector('a[href="/check-in/arrivals/81"] .ubif-result-label').tagName, 'SPAN');
   assert.match(panel.textContent, /3 results/);
 });
+
+test('buyback buttons sit beside item and sold serial links and bind their own result', async t => {
+  const w = boot(t, async path => path.includes('available-parts') ? ok([{ itemNumber: '12345', name: 'Screen' }, { itemNumber: '99999', name: 'Battery' }]) : path.includes('/boh/inventory/') ? ok({ ItemNumber: '12345', ProductName: 'Sold screen', SerialStatus: 'Sold' }) : empty(path));
+  const starts = []; w.UBIFPlusBuyback = { cancel() {}, start: (row, node) => starts.push({ row, node }) };
+  enter(w, 'I-1234567890'); await wait(25);
+  const buttons = [...w.document.querySelectorAll('.ubif-buyback-action')]; assert.equal(buttons.length, 3);
+  for (const button of buttons) {
+    assert.equal(button.parentElement.querySelector('a').contains(button), false);
+    assert.match(button.parentElement.querySelector('a').href, /store-products/);
+  }
+  buttons[1].click(); buttons[2].click();
+  assert.equal(starts[0].row.sku, '99999');
+  assert.equal(starts[1].row.sku, '12345'); assert.equal(starts[1].row.serial, 'I-1234567890');
+  assert.equal(starts[1].node, buttons[2].parentElement);
+  assert.equal(w.location.pathname, '/');
+});
+test('buyback setting removes buttons live while normal result links stay available', async t => {
+  const dom = new JSDOM('<header><div class="components-header-searchbox"></div></header>', { url: 'https://portal.ubreakifix.net/', runScripts: 'outside-only' });
+  t.after(() => dom.window.close()); const w = dom.window; let apply;
+  w.UBIFPlusSettings = { get: async () => ({ search: true, searchBuyback: false }), subscribe: fn => { apply = fn; } };
+  w.fetch = async path => path.includes('available-parts') ? ok([{ itemNumber: '12345', name: 'Screen' }]) : empty(path);
+  w.eval(model); w.eval(script); await wait(5); enter(w, 'screen'); await wait(20);
+  assert.equal(w.document.querySelector('.ubif-buyback-action'), null);
+  assert.equal(w.document.querySelectorAll('#ubif-search-results a').length, 1);
+  apply({ search: true, searchBuyback: true }); await wait(20);
+  assert.equal(w.document.querySelectorAll('.ubif-buyback-action').length, 1);
+  apply({ search: true, searchBuyback: false }); await wait(20);
+  assert.equal(w.document.querySelector('.ubif-buyback-action'), null);
+});
+test('remaining category responses preserve the inline serial chooser and newer queries cancel it', async t => {
+  let finishCustomer;
+  const w = boot(t, async path => {
+    if (path.includes('/customers?') && path.includes('screen')) return new Promise(resolve => { finishCustomer = resolve; });
+    if (path.includes('available-parts')) return ok([{ itemNumber: '12345', name: 'Screen' }]);
+    if (path.includes('/store-products/')) return ok({ value: [{ SerialNumber: '12345-1111111111', SerialStatus: 'Sold' }, { SerialNumber: '12345-2222222222', SerialStatus: 'Sold' }], '@odata.count': 2 });
+    return empty(path);
+  });
+  w.eval(fs.readFileSync(`${__dirname}/../extension/buyback.js`, 'utf8'));
+  enter(w, 'screen'); await wait(20); w.document.querySelector('.ubif-buyback-action').click(); await wait(20);
+  const chooser = w.document.querySelector('#ubif-buyback'); assert.equal(chooser.querySelectorAll('li button').length, 2);
+  finishCustomer(ok([])); await wait(20);
+  assert.equal(w.document.querySelector('#ubif-buyback'), chooser);
+  assert.equal(chooser.closest('.ubif-result-row').querySelector('a').textContent.includes('Screen'), true);
+  enter(w, 'battery'); await wait(20); assert.equal(w.document.querySelector('#ubif-buyback'), null);
+});

@@ -17,11 +17,12 @@ Built for Chrome and `portal.ubreakifix.net`. Runs inside your existing portal s
 | Feature | What it does |
 | --- | --- |
 | **Universal search** | Search customers, work orders, items, claims, and inventory serials from the portal header. Press **Cmd/Ctrl + K** to start. |
+| **Buyback labels** | Print inline with an item or sold serial search result; choose a sold serial when there are several. |
 | **Barcode scanning** | Open work orders, follow portal QR links, send other scans to search, and scan repeatedly during purchase-order receiving. |
 | **Update Today** | See active work orders due today or earlier, read/add notes, schedule the next update, and prepare supported status changes. |
 | **Custom columns** | Show, hide, reorder, and resize Workorders and Arrivals columns. Save a separate layout for each view. |
 | **Support chat** | Move and minimize chat while keeping the portal usable; recover supported sessions and receive configurable unread alerts. |
-| **Your preferences** | 32 controls across six feature categories, searchable settings, per-category resets, and a full-page settings view. |
+| **Your preferences** | 33 controls across six feature categories, searchable settings, per-category resets, and a full-page settings view. |
 
 Want the details? Read the [feature guide](docs/FEATURES.md), including keyboard controls, scanning rules, column behavior, and support-session limits.
 
@@ -84,7 +85,7 @@ Open the toolbar popup and choose a category—or use **Find a setting**. **Open
 | Category | Available preferences |
 | --- | --- |
 | Home | Hide the Home calendar. |
-| Universal search | Enable search; choose result categories, shortcut, typing delay, minimum characters, and opening results in new tabs. |
+| Universal search | Enable search; choose result categories, shortcut, typing delay, minimum characters, opening results in new tabs, and inline buyback buttons. |
 | Update Today | Enable the board; include tomorrow; configure periodic refresh, status dragging, and empty columns. |
 | Barcode scanning | Enable scanning; choose navigation, search forwarding, receiving, OEM field focus, and automatic confirmation. |
 | Tables | Customize Workorders and Arrivals columns independently; enable Arrivals pagination and choose 10/25/50/100 rows per page. |

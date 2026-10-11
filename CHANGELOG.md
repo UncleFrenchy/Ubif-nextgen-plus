@@ -6,6 +6,8 @@ User-visible changes are recorded here. **Unreleased** describes work in the cur
 
 ### Added
 
+- Add inline Print buyback buttons beside item and sold serial search results, a sold-serial chooser, and a Universal search setting to show or hide the buttons. Printing uses the linked work order’s native action.
+
 - Customer message templates inside the Messages sidebar: create, edit and delete locally saved templates, insert customer/device/work order/appointment fields with optional fallback text, and personalize a real-data preview before inserting into the Portal composer.
 
 ### Improved

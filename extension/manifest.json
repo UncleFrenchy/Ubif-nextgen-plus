@@ -15,7 +15,8 @@
       "js": [
         "page.js",
         "messages-page.js",
-        "arrivals-page.js"
+        "arrivals-page.js",
+        "buyback-page.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
@@ -38,7 +39,8 @@
         "message-model.js",
         "message-ui.js",
         "messages.js",
-        "support.js"
+        "support.js",
+        "buyback.js"
       ],
       "run_at": "document_idle"
     }

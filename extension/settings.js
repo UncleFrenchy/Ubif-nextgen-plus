@@ -20,6 +20,7 @@
     searchClaims: true,
     searchSerials: true,
     searchNewTab: false,
+    searchBuyback: true,
     scannerOpenLinks: true,
     scannerSearch: true,
     scannerReceiving: true,

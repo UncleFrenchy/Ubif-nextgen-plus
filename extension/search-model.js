@@ -30,9 +30,9 @@
       switch (request.kind) {
         case 'customers': return { key: `customer:${r.clientId || 1}:${r.id}`, title: r.fullName || [r.firstName, r.lastName].filter(Boolean).join(' '), detail: [r.primaryPhone, r.primaryEmail].filter(Boolean).join(' · '), href: r.customerTypeId === 2 ? `/admin/business-clients/${enc(r.id)}` : `/customer/${enc(r.id)}?${new URLSearchParams({ searchTerm: query, showBreadcrumb: 'true', clientId: r.clientId || 1 })}` };
         case 'workorders': return { key: `wo:${r.workorderId}`, title: `WO #${r.workorderId} · ${r.customer?.fullName || ''}`, detail: [r.deviceCatalog?.name, r.workorderStatusName, r.claimNumber].filter(Boolean).join(' · '), href: `/repair/workorder/${enc(r.workorderId)}` };
-        case 'items': return { key: `item:${r.itemNumber}`, title: r.name || r.itemNumber, detail: [r.itemNumber, r.AvailableQuantity == null ? '' : `${r.AvailableQuantity} available`].filter(Boolean).join(' · '), href: `/boh/inventory/store-products/${enc(r.itemNumber)}` };
+        case 'items': return { buyback: { sku: String(r.itemNumber) }, key: `item:${r.itemNumber}`, title: r.name || r.itemNumber, detail: [r.itemNumber, r.AvailableQuantity == null ? '' : `${r.AvailableQuantity} available`].filter(Boolean).join(' · '), href: `/boh/inventory/store-products/${enc(r.itemNumber)}` };
         case 'arrivals': return { key: `arrival:${r.arrivalId}`, title: r.customer?.fullName || `Arrival #${r.arrivalId}`, label: r.appointment && r.appointment !== '--' ? 'Appointment' : 'Arrival', detail: [r.customerDevice?.deviceName, r.arrivalStatus?.name, r.appointment].filter(Boolean).join(' · '), href: `/check-in/arrivals/${enc(r.arrivalId)}` };
-        case 'serial': return { key: `serial:${query}`, title: r.ProductName || r.ItemNumber, detail: [query, r.SerialStatus, r.Store].filter(Boolean).join(' · '), href: `/boh/inventory/store-products/${enc(r.ItemNumber)}` };
+        case 'serial': return { ...(String(r.SerialStatus).trim().toLowerCase() === 'sold' ? { buyback: { sku: String(r.ItemNumber), serial: query } } : {}), key: `serial:${query}`, title: r.ProductName || r.ItemNumber, detail: [query, r.SerialStatus, r.Store].filter(Boolean).join(' · '), href: `/boh/inventory/store-products/${enc(r.ItemNumber)}` };
       }
     });
   }

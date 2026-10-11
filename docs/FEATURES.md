@@ -140,3 +140,13 @@ Implementation references: [Chrome content scripts](https://developer.chrome.com
 ## Verification
 
 See the [README](../README.md#development-and-verification) for the current development commands and verification limits. Earlier manual checks reported in this project covered table catalogs, portal data responses, scanning routes, the Home toggle, and light/dark styling. These do not establish that every current workflow has been verified live after later changes.
+
+## Buyback label shortcut
+
+Search a SKU as usual, then click **Print buyback** beside its item result. The shortcut loads all inventory pages for the current store. One sold serial opens its linked work order and requests the native buyback print action. With several sold serials, choose the serial to print. No sold serials produces an empty-state message. Sold inventory serial results have their own button that uses that exact serial. Result links still open the product page. The chooser and lookup messages stay under the specific result.
+
+Toggle **Universal search → Buyback buttons in search** in extension settings. It is enabled by default; turning it off removes the buttons and cancels pending lookups. Turning universal search off also disables this shortcut. Buyback printing opens the linked work order in the current tab.
+
+Before navigating, the serial must still belong to the SKU, have Sold status, a sales order number, and a work order link. The shortcut uses Portal’s mounted cart action, including its eligibility/permission checks, buyback cart updates, and configured printer. An unavailable or disabled action leaves you on the work order with an explanation. “Print requested” means Portal received the action; check its printer/error messages for the actual result. The shortcut never automatically retries a print.
+
+A pending request stays only in this tab’s session storage, expires after one minute, and is removed before printing. Reloading the work order does not reprint. Native printer output still needs validation in a signed-in Portal tab.
